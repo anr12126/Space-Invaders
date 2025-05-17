@@ -1,4 +1,4 @@
-# Space Invaders - Pygame Edition
+# Space Invaders
 
 A retro-style **Space Invaders** game built using Python and Pygame, with support for both **keyboard and controller input**, **sound effects**, **explosions**, **increasing difficulty**, and **interactive menus**.
 
@@ -13,6 +13,9 @@ A retro-style **Space Invaders** game built using Python and Pygame, with suppor
 * 📈 Dynamic difficulty scaling
 * ⏸️ Pause menu with mouse interactivity
 * 🔁 Start and Game Over screens
+
+## Considerations
+This is my first Pygame project wher I experimented with sound effects, GUI interfaces, and controller integration. There is plenty of room for code optimization and performace improvement, but I am very happy with the result and all the fun features I was able to incorperate.
 
 ## Getting Started
 
