@@ -66,15 +66,6 @@ def read_joys():
     prev_state = but_state
 
 
-def update_player_position():
-    global playerX, playerX_change
-    playerX += playerX_change
-    if playerX <= 0:
-        playerX = 0
-    elif playerX >= 736:
-        playerX = 736
-
-
 def draw_text(words, size, color, x, y):
     new_font = pygame.font.Font("fonts/QuirkyRobot.ttf", size)
     render = new_font.render(words, True, color)
@@ -90,19 +81,25 @@ def reset():
     global num_enemies
 
     score_var = 0
+    enemyX_speed = 1
     for i in range(num_enemies):
         enemyX[i] = random.randint(0, 736)
         enemyY[i] = random.randint(50, 150)
+        enemyX_change[i] = enemyX_speed
+        explode_bool[i] = False
+        last_location[i] = []
+        counter[i] = 0
     playerX = 370
     over = False
     capped = False
     num_enemies = 1
-    enemyX_speed = 0.1
+
+    for i in range(num_lasers):
+        laser_State[i] = "ready"
     mixer.music.play(-1)
 
 
 def paused():
-    mixer.music.pause()
     draw_button("QUIT", 10, 10, 55, "l")
     draw_button("RESUME", -150, 10, -125, "r")
     player(player_Image, playerX, playerY)
@@ -160,7 +157,7 @@ pygame.display.set_icon(icon)
 
 # Player
 player_Image = pygame.image.load("images/battleship.png")
-player_speed = 0.75
+player_speed = 5
 playerX = 370
 playerY = 480
 playerX_change = 0
@@ -168,6 +165,15 @@ playerX_change = 0
 
 def player(pic, x, y):
     screen.blit(pic, (x, y))
+
+
+def update_player_position():
+    global playerX, playerX_change
+    playerX += playerX_change
+    if playerX <= 0:
+        playerX = 0
+    elif playerX >= 736:
+        playerX = 736
 
 
 # draw_enemy
@@ -181,7 +187,7 @@ last_location = []
 counter = []
 
 num_enemies = 1
-enemyX_speed = 0.05
+enemyX_speed = 1
 explode_image = pygame.image.load("images/blast.png")
 alien_image = pygame.image.load("images/alien.png")
 
@@ -203,10 +209,7 @@ def draw_enemy(pic, x, y):
 def update_enemy_positions():
     for i in range(num_enemies):
         enemyX[i] += enemyX_change[i]
-        if enemyX[i] <= 0:
-            enemyX_change[i] = -enemyX_change[i]
-            enemyY[i] += 40
-        elif enemyX[i] >= 736:
+        if enemyX[i] <= 0 or enemyX[i] >= 736:
             enemyX_change[i] = -enemyX_change[i]
             enemyY[i] += 40
 
@@ -224,7 +227,7 @@ for i in range(num_lasers):
     laser_Image.append(pygame.image.load("images/laser.png"))
     laserX.append(playerX+16)
     laserY.append(playerY)
-    laserY_change.append(1)
+    laserY_change.append(8)
     laser_State.append("ready")
 
 
@@ -295,7 +298,7 @@ pygame.display.update()
 running = True
 while running:
     # Set framerate
-    clock.tick(650)
+    clock.tick(120)
 
     # Get mouse input and draw background
     mouse = pygame.mouse.get_pos()
@@ -345,6 +348,7 @@ while running:
 
             # Pause menu
             if event.key == pygame.K_p:
+                mixer.music.pause()
                 pause = not pause
 
         # Stop moving on upward keystroke
@@ -401,15 +405,15 @@ while running:
         game_over(overX, overY)
         continue
 
+    # Check boundaries
+    update_enemy_positions()
+
     # Update enemy position
     for i in range(num_enemies):
 
         if enemyY[i] > 430:
             # Toggle game over
             game_end()
-
-        # Check boundaries
-        update_enemy_positions()
 
         # Check collision
         for j in range(num_lasers):
@@ -438,7 +442,7 @@ while running:
             counter[i] += 1
             screen.blit(explode_image,
                         (last_location[i][0], last_location[i][1]))
-            if counter[i] >= 100:
+            if counter[i] >= 20:
                 counter[i] = 0
                 explode_bool[i] = False
 
@@ -470,7 +474,7 @@ while running:
             counter.append(0)
 
             # Increase speed
-            enemyX_speed += 0.015
+            enemyX_speed += 0.8
             for i in range(num_enemies):
                 enemyX_change[i] = enemyX_speed*np.sign(enemyX_change[i])
 
